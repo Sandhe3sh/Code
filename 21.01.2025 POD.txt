@@ -1,0 +1,114 @@
+ 21.01.2025
+1st Ques Ans :
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+using namespace std;
+
+const int INF = 1e9;
+
+int hungarianAlgorithm(vector<vector<int>>& cost) {
+    int n = cost.size();
+    vector<int> u(n, 0), v(n, 0), p(n, 0), way(n, 0);
+
+    for (int i = 1; i < n; ++i) {
+        vector<int> minv(n, INF);
+        vector<bool> used(n, false);
+        int j0 = 0;
+        p[0] = i;
+
+        do {
+            used[j0] = true;
+            int i0 = p[j0], delta = INF, j1 = 0;
+            for (int j = 1; j < n; ++j) {
+                if (!used[j]) {
+                    int cur = cost[i0][j] - u[i0] - v[j];
+                    if (cur < minv[j]) {
+                        minv[j] = cur;
+                        way[j] = j0;
+                    }
+                    if (minv[j] < delta) {
+                        delta = minv[j];
+                        j1 = j;
+                    }
+                }
+            }
+            for (int j = 0; j < n; ++j) {
+                if (used[j]) {
+                    u[p[j]] += delta;
+                    v[j] -= delta;
+                } else {
+                    minv[j] -= delta;
+                }
+            }
+            j0 = j1;
+        } while (p[j0] != 0);
+
+        do {
+            int j1 = way[j0];
+            p[j0] = p[j1];
+            j0 = j1;
+        } while (j0 != 0);
+    }
+
+    return -v[0];
+}
+
+int main() {
+    vector<vector<int>> cost(4, vector<int>(4, 0));
+    for (int i = 1; i <= 3; ++i) {
+        for (int j = 1; j <= 3; ++j) {
+            cin >> cost[i][j];
+        }
+    }
+    cout << "Minimum total cost: " << hungarianAlgorithm(cost) << endl;
+    return 0;
+}
+
+
+
+
+2nd Ans:
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+vector<int> computePrefixTable(const string& s) {
+    int n = s.size();
+    vector<int> prefix(n, 0);
+    int j = 0;
+    for (int i = 1; i < n; i++) {
+        while (j > 0 && s[i] != s[j]) {
+            j = prefix[j - 1];
+        }
+        if (s[i] == s[j]) {
+            j++;
+        }
+        prefix[i] = j;
+    }
+    return prefix;
+}
+
+string shortestPalindrome(const string& s) {
+    string reversedS = s;
+    reverse(reversedS.begin(), reversedS.end());
+    string combined = s + "#" + reversedS;
+    vector<int> prefix = computePrefixTable(combined);
+    int maxPrefixLength = prefix.back();
+    string toAdd = reversedS.substr(0, reversedS.size() - maxPrefixLength);
+    return toAdd + s;
+}
+
+int main() {
+    string s;
+    cin >> s;
+    string result = shortestPalindrome(s);
+    cout << result << endl;
+    return 0;
+}
